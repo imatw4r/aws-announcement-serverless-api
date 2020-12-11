@@ -1,11 +1,10 @@
-#!/usr/bin/env python3
-
 from aws_cdk import core
 
-from announcement_app.announcement_app_stack import AnnouncementAppStack
+from deployment.stacks.app import AnnouncementAppStack
 
 
-app = core.App()
-AnnouncementAppStack(app, "announcement-app")
+if __name__ == "__main__":
+    app = core.App()
+    AnnouncementAppStack(app, "announcement-app")
 
-app.synth()
+    app.synth()

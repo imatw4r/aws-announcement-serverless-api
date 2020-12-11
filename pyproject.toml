@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "aws-epam-announcement-service"
+version = "0.1.0"
+description = "Simple Announcement Microservice on AWS"
+authors = ["Bartek Krzys <bartek.krzys@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "3.8.3"
+"aws-cdk.aws-lambda" = "^1.77.0"
+"aws-cdk.aws-dynamodb" = "^1.77.0"
+boto3 = "^1.16.34"
+"aws-cdk.aws-apigateway" = "^1.77.0"
+
+[tool.poetry.dev-dependencies]
+black = "^20.8b1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
