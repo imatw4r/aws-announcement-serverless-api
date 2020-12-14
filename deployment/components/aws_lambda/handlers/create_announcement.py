@@ -1,3 +1,4 @@
+from typing import TypedDict
 import json
 import os
 import boto3
@@ -15,10 +16,16 @@ dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table(ANNOUNCEMENT_TABLE_NAME)
 
 
+class Announcement(TypedDict):
+    title: str
+    description: str
+    date: str  # YYYY-MM-DD format
+
+
 def main(event, context):
     logger.debug("Recived event: %s", event)
     body = json.loads(event["body"])
-    item_payload = body["Item"]
+    item_payload: Announcement = body["Item"]
     item_id = str(uuid.uuid4())
     logger.info("Received item: %s", item_payload)
     try:
