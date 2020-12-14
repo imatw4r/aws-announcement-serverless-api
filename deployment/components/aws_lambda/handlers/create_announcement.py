@@ -1,3 +1,4 @@
+import json
 import os
 import boto3
 from botocore.exceptions import ValidationError, ClientError
@@ -15,7 +16,8 @@ def main(event, context):
     logger.debug("Recived event: %s", event)
     dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table(ANNOUNCEMENT_TABLE_NAME)
-    item_payload = event["Item"]
+    body = json.loads(event["body"])
+    item_payload = body["Item"]
     item_id = str(uuid.uuid4())
     logger.info("Received item: %s", item_payload)
     try:
@@ -26,6 +28,9 @@ def main(event, context):
             }
         )
     except ClientError as error:
-        return {"statusCode": 404, "error": str(error.response)}
+        return {
+            "statusCode": 404,
+            "body": json.dumps({"error": str(error.response["Error"]["Message"])}),
+        }
 
-    return {"id": item_id}
+    return {"statusCode": 200, "body": json.dumps({"id": item_id})}

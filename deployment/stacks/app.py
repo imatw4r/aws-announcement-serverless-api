@@ -8,7 +8,7 @@ from aws_cdk import aws_apigateway
 # from deployment.components.aws_lambda.function import AnnouncementLambda
 from deployment.components.dynamodb.table import create_table
 from deployment.components.aws_lambda.function import create_function
-from deployment.stacks.resources.announcement.resource import AnnouncemenetResourceStack
+from deployment.stacks.api.announcement.resource import AnnouncemenetResourceStack
 from deployment.stacks.api_deployment import (
     APIProdDeploymentStack,
     APIDevDeploymentStack,

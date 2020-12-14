@@ -78,16 +78,19 @@ class AnnouncemenetResourceStack(core.NestedStack):
                 properties={
                     "Item": aws_apigateway.JsonSchema(
                         type=aws_apigateway.JsonSchemaType.OBJECT,
-                        required=["title", "date"],
+                        required=["title", "date", "description"],
                         properties={
                             "title": aws_apigateway.JsonSchema(
                                 type=aws_apigateway.JsonSchemaType.STRING
                             ),
                             "description": aws_apigateway.JsonSchema(
-                                type=aws_apigateway.JsonSchemaType.STRING
+                                type=aws_apigateway.JsonSchemaType.STRING,
                             ),
                             "date": aws_apigateway.JsonSchema(
-                                type=aws_apigateway.JsonSchemaType.STRING
+                                type=aws_apigateway.JsonSchemaType.STRING,
+                                min_length=1,
+                                format="date",
+                                pattern="^\d{4}-([0]\d|1[0-2])-([0-2]\d|3[01])$",
                             ),
                         },
                     )
@@ -130,7 +133,7 @@ class AnnouncemenetResourceStack(core.NestedStack):
             "POST",
             integration=aws_apigateway.LambdaIntegration(
                 create_announcement_lambda,
-                proxy=False,
+                proxy=True,
                 integration_responses=[
                     aws_apigateway.IntegrationResponse(
                         status_code="200",
@@ -200,7 +203,7 @@ class AnnouncemenetResourceStack(core.NestedStack):
             "GET",
             integration=aws_apigateway.LambdaIntegration(
                 list_announcements_lambda,
-                proxy=False,
+                proxy=True,
                 integration_responses=[
                     aws_apigateway.IntegrationResponse(
                         status_code="200",
