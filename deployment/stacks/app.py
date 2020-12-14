@@ -18,31 +18,31 @@ from deployment.stacks.api_deployment import (
 class AnnouncementAppStack(core.Stack):
     CORS_ALLOWED_ORIGINS = ["*"]
 
-    def __init__(self, scope: core.Construct, construct_id: str, **kwargs) -> None:
+    def __init__(
+        self, scope: core.Construct, construct_id: str, *, settings, **kwargs
+    ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        table = self.create_table()
+        table = self.create_table(settings)
 
-        api = self.create_app("AnnouncementAPI")
+        api = self.create_app(settings)
 
         announcement_resource = AnnouncemenetResourceStack(
-            self,
-            api=api,
-            table_name=table.table_name,
+            self, api=api, table_name=table.table_name, settings=settings
         )
 
         deployment = self.deploy(api, methods=announcement_resource.methods)
         deployment.add_dependency(announcement_resource)
 
-    def create_app(self, name: str):
+    def create_app(self, settings):
         return aws_apigateway.RestApi(
             self,
-            name,
+            settings.AWS_API_GATEWAY_APP_NAME,
             # For now we do not want to keep old deployments
             retain_deployments=False,
             minimum_compression_size=10240,
             default_cors_preflight_options={
-                "allow_origins": self.CORS_ALLOWED_ORIGINS,
+                "allow_origins": settings.CORS_ALLOWED_ORIGINS.split(","),
                 "allow_methods": ["GET", "POST", "OPTIONS"],
             },
             # Because deployment is made by another stack,
@@ -50,23 +50,18 @@ class AnnouncementAppStack(core.Stack):
             deploy=False,
         )
 
-
-class AnnouncementAppProdStack(AnnouncementAppStack):
-    CORS_ALLOWED_ORIGINS = ""
-
-    def create_app(self, name: str):
-        return super().create_app("Prod-AnnouncementAPI")
-
-    def create_table(self):
+    def create_table(self, settings):
         return create_table(
             self,
             {
-                "read_capacity": 5,
-                "write_capacity": 5,
-                "table_name": "Prod-Announcement",
+                "read_capacity": settings.AWS_DYNAMODB_READ_CAPACITY,
+                "write_capacity": settings.AWS_DYNAMODB_WRITE_CAPACITY,
+                "table_name": settings.AWS_DYNAMODB_TABLE_NAME,
             },
         )
 
+
+class AnnouncementAppProdStack(AnnouncementAppStack):
     def deploy(self, api: aws_apigateway.RestApi, methods: List[aws_apigateway.Method]):
         return APIProdDeploymentStack(
             self,
@@ -77,17 +72,6 @@ class AnnouncementAppProdStack(AnnouncementAppStack):
 
 
 class AnnouncementAppDevStack(AnnouncementAppStack):
-    CORS_ALLOWED_ORIGINS = aws_apigateway.Cors.ALL_ORIGINS
-
-    def create_app(self, name: str):
-        return super().create_app("Dev-AnnouncementAPI")
-
-    def create_table(self):
-        return create_table(
-            self,
-            {"read_capacity": 5, "write_capacity": 5, "table_name": "Dev-Announcement"},
-        )
-
     def deploy(self, api: aws_apigateway.RestApi, methods: List[aws_apigateway.Method]):
         return APIDevDeploymentStack(
             self,

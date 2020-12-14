@@ -14,6 +14,7 @@ class AnnouncemenetResourceStack(core.NestedStack):
         *,
         api,
         table_name,
+        settings,
         parameters=None,
         timeout=None,
         notificationArns=None
@@ -25,6 +26,7 @@ class AnnouncemenetResourceStack(core.NestedStack):
             timeout=timeout,
             notification_arns=notificationArns,
         )
+        self.settings = settings
         self.methods = []
 
         announcement_resource = api.root.add_resource(
@@ -48,8 +50,10 @@ class AnnouncemenetResourceStack(core.NestedStack):
             settings={
                 "handler": "create_announcement.main",
                 "runtime": aws_lambda.Runtime.PYTHON_3_8,
-                "timeout": core.Duration.minutes(5),
-                "retry_attempts": 0,
+                "timeout": core.Duration.minutes(
+                    self.settings.AWS_LAMBDA_CREATE_ANNOUNCEMENT_TIMEOUT
+                ),
+                "retry_attempts": self.settings.AWS_LAMBDA_CREATE_ANNOUNCEMENT_RETRY_ATTEMPTS,
             },
         )
         create_announcement_lambda.add_environment(
@@ -189,8 +193,10 @@ class AnnouncemenetResourceStack(core.NestedStack):
             settings={
                 "handler": "list_announcements.main",
                 "runtime": aws_lambda.Runtime.PYTHON_3_8,
-                "timeout": core.Duration.minutes(5),
-                "retry_attempts": 0,
+                "timeout": core.Duration.minutes(
+                    self.settings.AWS_LAMBDA_GET_ANNOUNCEMENT_TIMEOUT
+                ),
+                "retry_attempts": self.settings.AWS_LAMBDA_GET_ANNOUNCEMENT_RETRY_ATTEMPTS,
             },
         )
         table.grant_read_data(list_announcements_lambda)

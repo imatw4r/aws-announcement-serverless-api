@@ -6,16 +6,17 @@ import uuid
 from logging import getLogger
 
 
-ANNOUNCEMENT_TABLE_NAME = os.environ.get("TABLE_NAME", "Announcements")
+ANNOUNCEMENT_TABLE_NAME = os.environ.get("TABLE_NAME")
 
 logger = getLogger(__file__)
 logger.setLevel("DEBUG")
 
+dynamodb = boto3.resource("dynamodb")
+table = dynamodb.Table(ANNOUNCEMENT_TABLE_NAME)
+
 
 def main(event, context):
     logger.debug("Recived event: %s", event)
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(ANNOUNCEMENT_TABLE_NAME)
     body = json.loads(event["body"])
     item_payload = body["Item"]
     item_id = str(uuid.uuid4())
