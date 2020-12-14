@@ -16,8 +16,6 @@ from deployment.stacks.api_deployment import (
 
 
 class AnnouncementAppStack(core.Stack):
-    CORS_ALLOWED_ORIGINS = ["*"]
-
     def __init__(
         self, scope: core.Construct, construct_id: str, *, settings, **kwargs
     ) -> None:
@@ -34,7 +32,7 @@ class AnnouncementAppStack(core.Stack):
         deployment = self.deploy(api, methods=announcement_resource.methods)
         deployment.add_dependency(announcement_resource)
 
-    def create_app(self, settings):
+    def create_app(self, settings) -> aws_apigateway.RestApi:
         return aws_apigateway.RestApi(
             self,
             settings.AWS_API_GATEWAY_APP_NAME,
@@ -50,7 +48,7 @@ class AnnouncementAppStack(core.Stack):
             deploy=False,
         )
 
-    def create_table(self, settings):
+    def create_table(self, settings) -> aws_dynamodb.Table:
         return create_table(
             self,
             {
@@ -62,7 +60,9 @@ class AnnouncementAppStack(core.Stack):
 
 
 class AnnouncementAppProdStack(AnnouncementAppStack):
-    def deploy(self, api: aws_apigateway.RestApi, methods: List[aws_apigateway.Method]):
+    def deploy(
+        self, api: aws_apigateway.RestApi, methods: List[aws_apigateway.Method]
+    ) -> APIProdDeploymentStack:
         return APIProdDeploymentStack(
             self,
             rest_api_id=api.rest_api_id,
@@ -72,7 +72,9 @@ class AnnouncementAppProdStack(AnnouncementAppStack):
 
 
 class AnnouncementAppDevStack(AnnouncementAppStack):
-    def deploy(self, api: aws_apigateway.RestApi, methods: List[aws_apigateway.Method]):
+    def deploy(
+        self, api: aws_apigateway.RestApi, methods: List[aws_apigateway.Method]
+    ) -> APIDevDeploymentStack:
         return APIDevDeploymentStack(
             self,
             rest_api_id=api.rest_api_id,

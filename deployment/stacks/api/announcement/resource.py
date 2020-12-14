@@ -1,3 +1,5 @@
+from typing import List
+
 from aws_cdk import core
 from aws_cdk import aws_apigateway
 from aws_cdk import aws_dynamodb
@@ -27,7 +29,7 @@ class AnnouncemenetResourceStack(core.NestedStack):
             notification_arns=notificationArns,
         )
         self.settings = settings
-        self.methods = []
+        self.methods_to_deploy: List[aws_apigateway.Method] = []
 
         announcement_resource = api.root.add_resource(
             "announcement",
@@ -178,7 +180,7 @@ class AnnouncemenetResourceStack(core.NestedStack):
             ],
         )
 
-        self.methods.append(create_announcement_method)
+        self.methods_to_deploy.append(create_announcement_method)
         return create_announcement_method
 
     def add_get_method(
@@ -186,7 +188,7 @@ class AnnouncemenetResourceStack(core.NestedStack):
         api: aws_apigateway.RestApi,
         resource: aws_apigateway.Resource,
         table: aws_dynamodb.Table,
-    ):
+    ) -> aws_apigateway.Method:
         list_announcements_lambda = create_function(
             stack=self,
             id="ListAnnouncementLambda",
@@ -220,5 +222,5 @@ class AnnouncemenetResourceStack(core.NestedStack):
                 ],
             ),
         )
-        self.methods.append(list_announcements_method)
+        self.methods_to_deploy.append(list_announcements_method)
         return list_announcements_method

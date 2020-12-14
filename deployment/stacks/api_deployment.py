@@ -39,7 +39,7 @@ class APIDeploymentStack(core.NestedStack):
 
 
 class APIProdDeploymentStack(APIDeploymentStack):
-    def deploy(self, deployment: aws_apigateway.Deployment):
+    def deploy(self, deployment: aws_apigateway.Deployment) -> aws_apigateway.Stage:
         return aws_apigateway.Stage(
             self,
             "ProdStage",
@@ -51,7 +51,7 @@ class APIProdDeploymentStack(APIDeploymentStack):
 
 
 class APIDevDeploymentStack(APIDeploymentStack):
-    def deploy(self, deployment: aws_apigateway.Deployment):
+    def deploy(self, deployment: aws_apigateway.Deployment) -> aws_apigateway.Stage:
         return aws_apigateway.Stage(
             self,
             "DevStage",
